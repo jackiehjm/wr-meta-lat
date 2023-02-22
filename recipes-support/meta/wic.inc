@@ -32,6 +32,8 @@ SRC_URI = "git://git.yoctoproject.org/poky;branch=dunfell \
            file://0001-isoimage-isohybrid.py-add-boot-param-BOOTIF-net_defa.patch \
            file://0001-isoimage-isohybrid-support-to-customize-syslinux.cfg.patch \
            file://0001-fix-float-object-cannot-be-interpreted-as-an-integer.patch \
+           file://0001-isoimage-isohybrid-fix-for-arm64.patch \
+           file://0001-isoimage-isohybrid-workaround-for-building-arm64-ima.patch \
            "
 
 S = "${WORKDIR}/git"

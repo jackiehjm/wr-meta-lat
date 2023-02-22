@@ -23,6 +23,11 @@ TOOLCHAIN_TARGET_TASK:append:x86-64 = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'efi-secure-boot', 'efitools', '', d)} \
 "
 
+# For stx arm64 lat-sdk
+TOOLCHAIN_TARGET_TASK:append:qemuarm64 = " \
+    grub-efi \
+"
+
 POPULATE_SDK_PRE_TARGET_COMMAND += "copy_pkgdata_to_sdk;"
 copy_pkgdata_to_sdk() {
     copy_pkgdata ${SDK_OUTPUT}${SDKPATHNATIVE}${datadir}/pkgdata

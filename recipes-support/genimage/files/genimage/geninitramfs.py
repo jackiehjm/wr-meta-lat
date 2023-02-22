@@ -110,7 +110,8 @@ class GenInitramfs(GenXXX):
         # If the Initramfs exists, reuse it
         image_name = "{0}-{1}.cpio.gz".format(self.image_name, self.machine)
         if self.machine in constant.SUPPORTED_ARM_MACHINES:
-            image_name += ".u-boot"
+            if self.machine != "qemuarm64":
+                image_name += ".u-boot"
 
 
         workdir = os.path.join(self.workdir, self.image_name)
@@ -131,7 +132,7 @@ class GenInitramfs(GenXXX):
 
         image_name = "%s-%s" % (self.image_name, self.machine)
         cmd_format = "ls -gh --time-style=+%%Y %s | awk '{$1=$2=$3=$4=$5=\"\"; print $0}'"
-        if self.machine in constant.SUPPORTED_ARM_MACHINES:
+        if self.machine in constant.SUPPORTED_ARM_MACHINES and self.machine != "qemuarm64":
             cmd = cmd_format % "{0}.cpio.gz.u-boot".format(image_name)
         else:
             cmd = cmd_format % "{0}.cpio.gz".format(image_name)

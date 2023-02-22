@@ -73,6 +73,9 @@ def set_parser_genimage(parser=None):
         supported_types.append('vmdk')
         supported_types.append('vdi')
 
+    if DEFAULT_MACHINE == "qemuarm64":
+        supported_types.append('iso')
+
     parser = set_parser(parser, supported_types)
     parser.add_argument('-g', '--gpgpath',
         default=None,
@@ -297,7 +300,7 @@ class GenImage(GenXXX):
 
     @show_task_info("Create ISO Image")
     def do_image_iso(self):
-        if self.machine != "intel-x86-64":
+        if self.machine != "intel-x86-64" and self.machine != "qemuarm64":
             logger.error("Only intel-x86-64 support ISO image")
             sys.exit(1)
 
@@ -628,7 +631,7 @@ class GenYoctoImage(GenImage):
                                                       self.data["ostree"]['ostree_use_ab'],
                                                       self.data["ostree"]['ostree_remote_url'])
             rootfs.add_rootfs_post_scripts(script_cmd)
-        elif self.machine == "intel-x86-64":
+        elif self.machine == "intel-x86-64" or self.machine == "qemuarm64":
             os.environ['OSTREE_CONSOLE'] = self.data["ostree"]['OSTREE_CONSOLE']
             script_cmd = os.path.join(self.data_dir, 'post_rootfs', 'update_grub_cfg.sh')
             script_cmd = "{0} {1}".format(script_cmd, rootfs.target_rootfs)
@@ -665,6 +668,14 @@ class GenYoctoImage(GenImage):
 
                 cmd = "ln -snf -r {0} {1}".format(os.path.join(self.deploydir, "bootx64.efi"),
                                                   os.path.join(self.deploydir, "grub-efi-bootx64.efi"))
+                utils.run_cmd_oneshot(cmd)
+        elif self.machine == "qemuarm64":
+            for files in ["boot/vmlinuz*", "boot/efi/EFI/BOOT/*"]:
+                cmd = "cp -rf {0}/{1} {2}".format(self.target_rootfs, files, self.deploydir)
+                utils.run_cmd_oneshot(cmd)
+
+                cmd = "ln -snf -r {0} {1}".format(os.path.join(self.deploydir, "bootaa64.efi"),
+                                                  os.path.join(self.deploydir, "grub-efi-bootaa64.efi"))
                 utils.run_cmd_oneshot(cmd)
 
         else:
@@ -730,7 +741,8 @@ class GenYoctoImage(GenImage):
         # If the Initramfs exists, reuse it
         image_name = "initramfs-ostree-image-{0}.cpio.gz".format(self.machine)
         if self.machine in constant.SUPPORTED_ARM_MACHINES:
-            image_name += ".u-boot"
+            if self.machine != "qemuarm64":
+                image_name += ".u-boot"
 
         image = os.path.join(self.deploydir, image_name)
         if os.path.exists(os.path.realpath(image)):
@@ -798,6 +810,9 @@ class GenExtDebImage(GenImage):
             if DEFAULT_MACHINE == "intel-x86-64":
                 self.data['image_type'].append('iso')
                 self.data['image_type'].append('pxe')
+            if DEFAULT_MACHINE == "qemuarm64":
+                self.data['image_type'].append('iso')
+
 
     def do_prepare(self):
         target_rootfs = os.path.join(self.workdir, self.image_name, "rootfs")
@@ -838,7 +853,6 @@ class GenExtDebImage(GenImage):
         rootfs.create()
 
         self._do_rootfs_post(rootfs)
-
 
     def _do_rootfs_post(self, rootfs=None):
         if rootfs is None:
@@ -905,38 +919,40 @@ class GenExtDebImage(GenImage):
                 utils.boot_sign_cmd(gpgid, gpgpassword, gpgpath, unsign_file)
 
             # Sign kernel
-            for kernel in glob.glob(os.path.join(rootfs.target_rootfs, 'boot', 'vmlinuz-*-amd64')):
+            for kernel in glob.glob(os.path.join(rootfs.target_rootfs, 'boot', 'vmlinuz-*-arm64')):
                 utils.boot_sign_cmd(gpgid, gpgpassword, gpgpath, kernel)
 
         # No secure boot
         else:
             # Copy no secure boot loader to rootfs if it is not available
             src = self.data['gpg']['grub']['BOOT_NOSIG_GRUB']
-            dst = os.path.join(rootfs_efi, "bootx64.efi")
+            dst = os.path.join(rootfs_efi, "bootaa64.efi")
             if not os.path.exists(dst):
                 utils.run_cmd_oneshot("cp -f %s %s" % (src, dst))
 
         # Make sure deploy dir clean
-        utils.run_cmd_oneshot("rm -f vmlinuz-*-amd64* *.efi* grub.cfg*", cwd=self.deploydir)
+        utils.run_cmd_oneshot("rm -f vmlinuz-*-arm64* *.efi* grub.cfg*", cwd=self.deploydir)
 
         if self.data['gpg']['grub'].get('EFI_SECURE_BOOT', 'disable') != 'enable':
 
             utils.run_cmd_oneshot("rm -f *.sig", cwd=self.deploydir)
 
-            # grub-efi-bootx64.efi is required by bootfs.sh while secure boot disabled
-            utils.run_cmd_oneshot("cp -f %s/bootx64.efi %s/grub-efi-bootx64.efi" % (rootfs_efi, self.deploydir))
+            # grub-efi-bootaa64.efi is required by bootfs.sh while secure boot disabled
+            utils.run_cmd_oneshot("cp -f %s/bootaa64.efi %s/grub-efi-bootaa64.efi" % (rootfs_efi, self.deploydir))
 
         # Copy kernel image (including sig) to deploy dir
-        utils.run_cmd_oneshot("cp %s/boot/vmlinuz-*-amd64* %s" % (rootfs.target_rootfs, self.deploydir))
+        utils.run_cmd_oneshot("cp %s/boot/vmlinuz-*-arm64* %s" % (rootfs.target_rootfs, self.deploydir))
 
         # Copy boot loader to deploy dir
         utils.run_cmd_oneshot("cp -f %s/* %s" % (rootfs_efi, self.deploydir))
 
         # Create symlink bzIamge to kernel
-        for kernel in glob.glob(os.path.join(self.deploydir, 'vmlinuz-*-amd64')):
-            utils.run_cmd_oneshot("ln -snf -r %s bzImage" % kernel, cwd=self.deploydir)
+        for kernel in glob.glob(os.path.join(self.deploydir, 'vmlinuz-*-arm64')):
+            #utils.run_cmd_oneshot("ln -snf -r %s bzImage" % kernel, cwd=self.deploydir)
+            utils.run_cmd_oneshot("ln -snf -r %s vmlinuz" % kernel, cwd=self.deploydir)
             if self.data['gpg']['grub'].get('EFI_SECURE_BOOT', 'disable') == 'enable':
-                utils.run_cmd_oneshot("ln -snf -r %s.sig bzImage.sig" % kernel, cwd=self.deploydir)
+                #utils.run_cmd_oneshot("ln -snf -r %s.sig bzImage.sig" % kernel, cwd=self.deploydir)
+                utils.run_cmd_oneshot("ln -snf -r %s.sig vmlinuz.sig" % kernel, cwd=self.deploydir)
                 break
 
     @show_task_info("Create External Debian OSTree Repo")
@@ -1031,7 +1047,7 @@ class GenExtDebImage(GenImage):
         # - all __pycache__ directories
         # - locale entries - we are using the default "C" locale for initial boot
         # - vim - no need for an editor
-        cmd = "cd %s && rm -rf lib/modules/5*rt*amd64 && rm -rf usr/bin/vim.basic " % miniboot_initramfs
+        cmd = "cd %s && rm -rf lib/modules/5*rt*arm64 && rm -rf usr/bin/vim.basic " % miniboot_initramfs
         cmd += " && rm -rf usr/share/locale/* && rm -rf usr/share/info/* "
         cmd += " && find . -type d -name '__pycache__' -print0 | xargs -0 rm -rf "
         utils.run_cmd_oneshot(cmd)

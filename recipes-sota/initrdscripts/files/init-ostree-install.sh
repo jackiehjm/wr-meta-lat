@@ -81,8 +81,8 @@ OPTIONAL:
  Disk sizing
  biosplusefi=1	 		- Create one GPT disk to support booting from both of BIOS and EFI
  defaultkernel=<kernel>	- Choose which kernel to boot, support filename wildcard
-		                  defaultkernel=vmlinuz-*[!t]-amd64 means standard kernel
-		                  defaultkernel=vmlinuz-*-rt-amd64 means real time kernel
+		                  defaultkernel=vmlinuz-*[!t]-arm64 means standard kernel
+		                  defaultkernel=vmlinuz-*-rt-arm64 means real time kernel
  kernelparams=a=b,c=d	- Set kernel params to installed OS, use `,' to split multiple params
 
  efibootfirst=1		- Set EFI boot from disk entry as first order

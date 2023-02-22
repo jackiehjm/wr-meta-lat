@@ -16,7 +16,7 @@
 #
 DEFAULT_IMAGE = "debian-image-base"
 
-DEFAULT_INITRD_NAME = "debian-initramfs-ostree-image"
+DEFAULT_INITRD_NAME = "starlingx-initramfs-ostree-image"
 
 DEFAULT_CONTAINER_NAME = "debian-container-base"
 
@@ -33,7 +33,7 @@ export PATH={0}
 chroot $IMAGE_ROOTFS bash << SCRIPT_ENDOF
 set -e
 apt update
-apt install -y --no-install-recommends linux-image-amd64 linux-image-rt-amd64 grub-common
+apt install -y --no-install-recommends linux-image-5.10.0-6-arm64-unsigned linux-image-rt-arm64 grub-common
 apt install -y --allow-downgrades --allow-unauthenticated --no-install-recommends \
     ostree=${DEBIAN_OSTREE_VERSION} \
     ostree-boot=${DEBIAN_OSTREE_VERSION} \
@@ -76,7 +76,7 @@ ln -snf --relative $IMAGE_ROOTFS/bin/bash $IMAGE_ROOTFS/bin/sh\
 
 SCRIPT_DEBIAN_SET_MISC = '''\
 # Set hostname
-echo "intel-x86-64" > $IMAGE_ROOTFS/etc/hostname
+echo "qemuarm64" > $IMAGE_ROOTFS/etc/hostname
 
 # Clean up dead link
 rm -rf $IMAGE_ROOTFS/initrd.img* $IMAGE_ROOTFS/vmlinuz*
@@ -131,8 +131,8 @@ OSTREE_INITRD_PACKAGES = '''
     ostree-boot=${DEBIAN_OSTREE_VERSION}
     libostree-1-1=${DEBIAN_OSTREE_VERSION}
     tar udev util-linux fdisk mount lvm2
-    linux-image-amd64 grub2 psmisc procps
-    linux-image-rt-amd64
+    linux-image-5.10.0-6-arm64-unsigned grub2 psmisc procps
+    linux-image-rt-arm64
     ifupdown iproute2 isc-dhcp-client isc-dhcp-common
 '''.split()
 
@@ -161,11 +161,11 @@ DEFAULT_OSTREE_DATA = {
   'OSTREE_FDISK_RSZ': int('8192'),
   'OSTREE_FDISK_VSZ': int('${OSTREE_FDISK_VSZ}'),
   'OSTREE_FDISK_FSZ': int('${OSTREE_FDISK_FSZ}'),
-  'OSTREE_CONSOLE': 'console=ttyS0,115200 console=tty1',
+  'OSTREE_CONSOLE': 'console=ttyAMA0,115200 console=tty1',
 }
 
-MULTIPLE_KERNELS = 'vmlinuz-*[!t]-amd64 vmlinuz-*-rt-amd64'
-DEFAULT_KERNEL = 'vmlinuz-*[!t]-amd64'
+MULTIPLE_KERNELS = 'vmlinuz-*[!t]-arm64 vmlinuz-*-rt-arm64'
+DEFAULT_KERNEL = 'vmlinuz-*[!t]-arm64'
 
 SCRIPT_DEBIAN_INSTALL_PXE = '''\
 cd ${ISO_DIR}
@@ -186,7 +186,7 @@ ENDOF
 mkdir -p pxeboot/pxelinux.cfg
 
 # 2.1 Kernel and initramfs
-install -m 644 bzImage*  pxeboot
+install -m 644 vmlinuz*  pxeboot
 install -m 644 initrd* pxeboot
 
 # 2.2 Bootloader

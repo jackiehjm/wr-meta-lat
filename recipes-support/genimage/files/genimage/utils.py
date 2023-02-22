@@ -701,7 +701,7 @@ GRUB_CFG_ISO_ENTRY = '''\
 menuentry "OSTree Install %NAME%" --unrestricted {
     set fallback=1
     efi-watchdog enable 0 180
-    linux /bzImage %BOOT_PARAMS%
+    linux /vmlinuz %BOOT_PARAMS%
     initrd @INITRD@
 }
 '''
@@ -752,7 +752,7 @@ DEFAULT %NAME%
 SYSLINUX_CFG_ISO_ENTRY = '''
 LABEL %NAME%
     menu label ^OSTree Install %NAME%
-    kernel /bzImage
+    kernel /vmlinuz
     ipappend 2
     append initrd=@INITRD@ %BOOT_PARAMS%
 '''

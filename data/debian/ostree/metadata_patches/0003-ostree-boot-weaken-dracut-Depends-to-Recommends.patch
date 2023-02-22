@@ -27,7 +27,7 @@ index dfa992e3..d2560bc9 100644
   ${shlibs:Depends},
  Recommends:
 + dracut,
-  grub-efi-amd64 | grub-pc | extlinux | syslinux | u-boot,
+  grub-efi-arm64 | grub-pc | extlinux | syslinux | u-boot,
  Breaks:
   ostree (<< ${binary:Version}),
 -- 

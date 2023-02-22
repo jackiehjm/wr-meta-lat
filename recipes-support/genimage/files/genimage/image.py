@@ -132,7 +132,7 @@ class CreateInitramfs(Image):
 
     def create(self):
         self._create_cpio_gz()
-        if self.machine in constant.SUPPORTED_ARM_MACHINES:
+        if self.machine in constant.SUPPORTED_ARM_MACHINES and self.machine != "qemuarm64":
             self._create_uboot()
         self._create_symlinks()
 
@@ -162,7 +162,7 @@ class CreateInitramfs(Image):
     def _create_symlinks(self):
         dst = os.path.join(self.deploydir, self.image_linkname + ".cpio.gz")
         src = os.path.join(self.deploydir, self.image_fullname + ".rootfs.cpio.gz")
-        if self.machine in constant.SUPPORTED_ARM_MACHINES:
+        if self.machine in constant.SUPPORTED_ARM_MACHINES and self.machine != "qemuarm64":
             dst = dst + ".u-boot"
             src = src + ".u-boot"
 
@@ -410,7 +410,7 @@ class CreatePXE(Image):
 
         utils.run_cmd_oneshot("install -m 0644 %s %s/EFI/BOOT/grub.cfg" % (self.grub_cfg, self.tftp_dir))
 
-        utils.run_cmd_oneshot("install -m 0644 %s/bzImage* %s/" % (self.deploydir, self.tftp_dir))
+        utils.run_cmd_oneshot("install -m 0644 %s/vmlinuz* %s/" % (self.deploydir, self.tftp_dir))
 
         for f in ["libcom32.c32", "ldlinux.c32", "libutil.c32", "vesamenu.c32", "pxelinux.0"]:
             s = os.path.join(os.environ['OECORE_TARGET_SYSROOT'], "usr/share/syslinux", f)

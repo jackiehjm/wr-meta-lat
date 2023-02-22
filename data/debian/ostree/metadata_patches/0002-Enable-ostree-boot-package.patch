@@ -29,7 +29,7 @@ index bc3838e0..dfa992e3 100644
 + ${misc:Depends},
 + ${shlibs:Depends},
 +Recommends:
-+ grub-efi-amd64 | grub-pc | extlinux | syslinux | u-boot,
++ grub-efi-arm64 | grub-pc | extlinux | syslinux | u-boot,
 +Breaks:
 + ostree (<< ${binary:Version}),
 + ostree-grub2 (<< ${binary:Version}),
@@ -70,7 +70,7 @@ index 8d51a694..00000000
 - ${misc:Depends},
 - ${shlibs:Depends},
 -Recommends:
-- grub-efi-amd64 | grub-pc | extlinux | syslinux | u-boot,
+- grub-efi-arm64 | grub-pc | extlinux | syslinux | u-boot,
 -Breaks:
 - ostree (<< ${binary:Version}),
 - ostree-grub2 (<< ${binary:Version}),

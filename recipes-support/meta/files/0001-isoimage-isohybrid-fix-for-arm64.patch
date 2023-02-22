@@ -1,0 +1,54 @@
+From 840e6ae5a902212b8a5cc5850770106681b36a9a Mon Sep 17 00:00:00 2001
+From: Jackie Huang <jackie.huang@windriver.com>
+Date: Tue, 28 Feb 2023 10:54:41 +0800
+Subject: [PATCH] isoimage-isohybrid: fix for arm64
+
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
+---
+ scripts/lib/wic/plugins/source/isoimage-isohybrid.py | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/scripts/lib/wic/plugins/source/isoimage-isohybrid.py b/scripts/lib/wic/plugins/source/isoimage-isohybrid.py
+index 9c751520d3..ae9361fbe4 100644
+--- a/scripts/lib/wic/plugins/source/isoimage-isohybrid.py
++++ b/scripts/lib/wic/plugins/source/isoimage-isohybrid.py
+@@ -88,7 +88,7 @@ class IsoImagePlugin(SourcePlugin):
+ 
+                 syslinux_conf += "LABEL %s\n" % label
+ 
+-                kernel = os.environ.get("KERNEL_IMAGETYPE", "bzImage")
++                kernel = os.environ.get("KERNEL_IMAGETYPE", "vmlinuz")
+                 if os.environ.get("INITRAMFS_IMAGE_BUNDLE", "0") == "1":
+                     if get_bitbake_var("INITRAMFS_IMAGE"):
+                         kernel = "%s-%s.bin" % \
+@@ -150,7 +150,7 @@ class IsoImagePlugin(SourcePlugin):
+ 
+                 grubefi_conf += "menuentry '%s'{\n" % label
+ 
+-                kernel = os.environ.get("KERNEL_IMAGETYPE", "bzImage")
++                kernel = os.environ.get("KERNEL_IMAGETYPE", "vmlinuz")
+                 if os.environ.get("INITRAMFS_IMAGE_BUNDLE", "0") == "1":
+                     if get_bitbake_var("INITRAMFS_IMAGE"):
+                         kernel = "%s-%s.bin" % \
+@@ -346,7 +346,7 @@ class IsoImagePlugin(SourcePlugin):
+         if os.path.isfile("%s/initrd.cpio.gz" % cr_workdir):
+             os.remove("%s/initrd.cpio.gz" % cr_workdir)
+ 
+-        kernel = os.environ.get("KERNEL_IMAGETYPE", "bzImage")
++        kernel = os.environ.get("KERNEL_IMAGETYPE", "vmlinuz")
+         if os.environ.get("INITRAMFS_IMAGE_BUNDLE", "0") == "1":
+             if get_bitbake_var("INITRAMFS_IMAGE"):
+                 kernel = "%s-%s.bin" % \
+@@ -382,6 +382,9 @@ class IsoImagePlugin(SourcePlugin):
+                 elif re.match('i.86', target_arch):
+                     grub_src_image = "grub-efi-bootia32.efi"
+                     grub_dest_image = "bootia32.efi"
++                elif re.match("aarch64", target_arch):
++                    grub_src_image = "grub-efi-bootaa64.efi"
++                    grub_dest_image = "bootaa64.efi"
+                 else:
+                     raise WicError("grub-efi is incompatible with target %s" %
+                                    target_arch)
+-- 
+2.25.1
+

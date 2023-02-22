@@ -217,9 +217,16 @@ DEFAULT_PACKAGES_axxiaarm = '''
     kernel-devicetree
 '''.split()
 
+DEFAULT_PACKAGES_qemuarm64 = '''
+    grub-efi
+    kernel-image-uimage
+    kernel-devicetree
+'''.split()
+
 # default rootfs: ${LAT_DEFAULT_IMAGE}
 DEFAULT_PACKAGES = {
     'intel-x86-64': DEFAULT_PACKAGES_intel_x86_64 + DEFAULT_PACKAGES_COMMON,
+    'qemuarm64': DEFAULT_PACKAGES_qemuarm64 + DEFAULT_PACKAGES_COMMON,
     'bcm-2xxx-rpi4': DEFAULT_PACKAGES_bcm_2xxx_rpi4 + DEFAULT_PACKAGES_COMMON,
     'xilinx-zynqmp': DEFAULT_PACKAGES_xilinx_zynqmp + DEFAULT_PACKAGES_COMMON,
     'xilinx-zynq': DEFAULT_PACKAGES_xilinx_zynq + DEFAULT_PACKAGES_COMMON,
@@ -329,7 +336,7 @@ DEFAULT_OSTREE_DATA = {
   'OSTREE_FDISK_RSZ': int('${OSTREE_FDISK_RSZ}'),
   'OSTREE_FDISK_VSZ': int('${OSTREE_FDISK_VSZ}'),
   'OSTREE_FDISK_FSZ': int('${OSTREE_FDISK_FSZ}'),
-  'OSTREE_CONSOLE': '${OSTREE_CONSOLE}',
+  'OSTREE_CONSOLE': 'console=ttyAMA0,115200 console=tty1',
 }
 
 EXTRA_IMAGE_BOOT_FILES = {

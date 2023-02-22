@@ -1,0 +1,29 @@
+From 089a4050c55dd64470c3734c284d5a9ecfea3b0f Mon Sep 17 00:00:00 2001
+From: Jackie Huang <jackie.huang@windriver.com>
+Date: Tue, 28 Feb 2023 13:59:37 +0800
+Subject: [PATCH] isoimage-isohybrid: workaround for building arm64 image in
+ x64 SDK
+
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
+---
+ scripts/lib/wic/plugins/source/isoimage-isohybrid.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/scripts/lib/wic/plugins/source/isoimage-isohybrid.py b/scripts/lib/wic/plugins/source/isoimage-isohybrid.py
+index ae9361fbe4..46e391b8c9 100644
+--- a/scripts/lib/wic/plugins/source/isoimage-isohybrid.py
++++ b/scripts/lib/wic/plugins/source/isoimage-isohybrid.py
+@@ -377,8 +377,8 @@ class IsoImagePlugin(SourcePlugin):
+                     raise WicError("Coludn't find target architecture")
+ 
+                 if re.match("x86_64", target_arch):
+-                    grub_src_image = "grub-efi-bootx64.efi"
+-                    grub_dest_image = "bootx64.efi"
++                    grub_src_image = "grub-efi-bootaa64.efi"
++                    grub_dest_image = "bootaa64.efi"
+                 elif re.match('i.86', target_arch):
+                     grub_src_image = "grub-efi-bootia32.efi"
+                     grub_dest_image = "bootia32.efi"
+-- 
+2.25.1
+

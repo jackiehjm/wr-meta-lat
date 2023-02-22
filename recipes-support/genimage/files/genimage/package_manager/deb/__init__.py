@@ -41,6 +41,8 @@ def debian_arch_map(machine):
         return "amd64"
     if machine == "bcm-2xxx-rpi4":
         return "arm64"
+    if machine == "qemuarm64":
+        return "arm64"
     return arch
 
 def dpkg_query(cmd_output):
@@ -525,8 +527,8 @@ class ExternalDebian(object):
                 match_arch = re.match(r"  Architecture \".*\";$", line)
                 architectures = ""
                 if match_arch:
-                    utils.write(apt_conf_file, "w+", "  Architectures amd64;")
-                    utils.write(apt_conf_file, "w+", "  Architecture \"amd64\";")
+                    utils.write(apt_conf_file, "w+", "  Architectures arm64;")
+                    utils.write(apt_conf_file, "w+", "  Architecture \"arm64\";")
                     utils.write(apt_conf_file, "w+", "  System \"Debian APT solver interface\";")
                 else:
                     line = re.sub(r"#ROOTFS#", self.target_rootfs, line)
@@ -566,7 +568,7 @@ class ExternalDebian(object):
         bootstrap_tar = os.path.join(self.workdir, "bootstrap-{0}.tar".format(hash_hex))
         if not os.path.exists(bootstrap_tar):
             with tempfile.TemporaryDirectory(dir=os.path.dirname(bootstrap_tar)) as tmpdirname:
-                cmd = "debootstrap --variant=minbase --arch=amd64 --include=gpg,gpg-agent --merged-usr {0} --components={1} --make-tarball={2} {3} {4} {5}".format(
+                cmd = "debootstrap --variant=minbase --arch=arm64 --include=gpg,gpg-agent --merged-usr {0} --components={1} --make-tarball={2} {3} {4} {5}".format(
                                                                              debootstrap_secure_opt,
                                                                              ','.join(self.bootstrap_components),
                                                                              bootstrap_tar,
@@ -580,7 +582,7 @@ class ExternalDebian(object):
         else:
             logger.debug("Reuse debootstrap tarball %s", bootstrap_tar)
 
-        cmd = "debootstrap --variant=minbase --arch=amd64 --merged-usr {0} --components={1} --unpack-tarball={2} {3} {4} {5}".format(
+        cmd = "debootstrap --variant=minbase --arch=arm64 --merged-usr {0} --components={1} --unpack-tarball={2} {3} {4} {5}".format(
                                                                             debootstrap_secure_opt,
                                                                             ','.join(self.bootstrap_components),
                                                                              bootstrap_tar,
