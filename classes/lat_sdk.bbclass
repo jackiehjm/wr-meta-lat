@@ -25,6 +25,9 @@ TOOLCHAIN_TARGET_TASK:append:x86-64 = " \
 
 # For stx arm64 lat-sdk
 TOOLCHAIN_TARGET_TASK:append:qemuarm64 = " \
+    syslinux-misc \
+    syslinux-isolinux \
+    syslinux-pxelinux \
     grub-efi \
 "
 
