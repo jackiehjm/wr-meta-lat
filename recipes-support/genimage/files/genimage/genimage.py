@@ -944,7 +944,9 @@ class GenExtDebImage(GenImage):
         utils.run_cmd_oneshot("cp %s/boot/vmlinuz-*-arm64* %s" % (rootfs.target_rootfs, self.deploydir))
 
         # Copy boot loader to deploy dir
-        utils.run_cmd_oneshot("cp -f %s/* %s" % (rootfs_efi, self.deploydir))
+        res, output = utils.run_cmd("cp -f %s/* %s" % (rootfs_efi, self.deploydir), shell=True)
+        if res != 0:
+            logger.debug(output)
 
         # Create symlink bzIamge to kernel
         for kernel in glob.glob(os.path.join(self.deploydir, 'vmlinuz-*-arm64')):
