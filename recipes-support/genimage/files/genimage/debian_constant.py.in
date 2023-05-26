@@ -199,8 +199,8 @@ done
 
 # 2.2.2 EFI PXE
 cp -a EFI pxeboot
-if [ -e $OECORE_TARGET_SYSROOT/boot/efi/EFI/BOOT/bootx64-nosig.efi ]; then
-  cp $OECORE_TARGET_SYSROOT/boot/efi/EFI/BOOT/bootx64-nosig.efi pxeboot/EFI/BOOT/
+if [ -e $OECORE_TARGET_SYSROOT/boot/efi/EFI/BOOT/bootaa64-nosig.efi ]; then
+  cp $OECORE_TARGET_SYSROOT/boot/efi/EFI/BOOT/bootaa64-nosig.efi pxeboot/EFI/BOOT/
 fi
 
 # 2.3 Edit grub.cfg and pxelinux.cfg/default
@@ -236,9 +236,9 @@ ENDOF
 
 # 2.4 Tweak PXE if EFI secure boot enabled
 if [ "$EFI_SECURE_BOOT" = enable ]; then
-  # On some host, PXE make bootx64.efi search grubx64.efi
+  # On some host, PXE make bootaa64.efi search grubaa64.efi
   # from tftp/ dir other than tftp/EFI/BOOT/
-  install -m 0644 EFI/BOOT/grubx64.efi pxeboot/
+  install -m 0644 EFI/BOOT/grubaa64.efi pxeboot/
 
   # Resign grub.cfg
   rm pxeboot/EFI/BOOT/grub.cfg.sig
